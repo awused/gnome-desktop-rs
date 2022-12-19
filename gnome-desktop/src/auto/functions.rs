@@ -6,6 +6,8 @@
 use crate::DesktopThumbnailSize;
 use glib::object::IsA;
 use glib::translate::*;
+use std::boxed::Box as Box_;
+use std::pin::Pin;
 use std::ptr;
 
 /// Returns whether the thumbnail has the correct uri and mtime embedded in the
@@ -331,28 +333,113 @@ pub fn parse_locale(
     }
 }
 
-//#[doc(alias = "gnome_start_systemd_scope")]
-//pub fn start_systemd_scope<P: FnOnce(Result<(), glib::Error>) + 'static>(name: &str, pid: i32, description: Option<&str>, connection: /*Ignored*/Option<&gio::DBusConnection>, cancellable: Option<&impl IsA<gio::Cancellable>>, callback: P) {
-//    unsafe { TODO: call ffi:gnome_start_systemd_scope() }
-//}
+/// If the current process is running inside a user systemd instance, then move
+/// the launched PID into a transient scope. The given @name will be used to
+/// create a unit name. It should be the application ID or the executable in all
+/// other cases. If a desktop-id is passed then the .desktop suffix will be
+/// stripped.
+///
+/// It is advisable to use this function every time where the started application
+/// can be considered reasonably independent of the launching application. Placing
+/// it in a scope creates proper separation between the programs rather than being
+/// considered a single entity by systemd.
+///
+/// It is always safe to call this function. Note that a successful return code
+/// does not imply that a unit has been created. It solely means that no error
+/// condition was hit sending the request.
+///
+/// If @connection is [`None`] then g_dbus_get() will be called internally.
+///
+/// Note that most callers will not need to handle errors. As such, it is normal
+/// to pass a [`None`] @callback.
+/// ## `name`
+/// Name for the application
+/// ## `pid`
+/// The PID of the application
+/// ## `description`
+/// A description to use for the unit, or [`None`]
+/// ## `connection`
+/// An #GDBusConnection to the session bus, or [`None`]
+/// ## `cancellable`
+/// #GCancellable to use
+/// ## `callback`
+/// Callback to call when the operation is done
+#[doc(alias = "gnome_start_systemd_scope")]
+pub fn start_systemd_scope<P: FnOnce(Result<(), glib::Error>) + 'static>(
+    name: &str,
+    pid: i32,
+    description: Option<&str>,
+    connection: Option<&gio::DBusConnection>,
+    cancellable: Option<&impl IsA<gio::Cancellable>>,
+    callback: P,
+) {
+    assert_initialized_main_thread!();
 
-//
-//pub fn start_systemd_scope_future(name: &str, pid: i32, description: Option<&str>, connection: /*Ignored*/Option<&gio::DBusConnection>) -> Pin<Box_<dyn std::future::Future<Output = Result<(), glib::Error>> + 'static>> {
+    let main_context = glib::MainContext::ref_thread_default();
+    let is_main_context_owner = main_context.is_owner();
+    let has_acquired_main_context = (!is_main_context_owner)
+        .then(|| main_context.acquire().ok())
+        .flatten();
+    assert!(
+        is_main_context_owner || has_acquired_main_context.is_some(),
+        "Async operations only allowed if the thread is owning the MainContext"
+    );
 
-//skip_assert_initialized!();
-//let name = String::from(name);
-//let description = description.map(ToOwned::to_owned);
-//let connection = connection.map(ToOwned::to_owned);
-//Box_::pin(gio::GioFuture::new(&(), move |_obj, cancellable, send| {
-//    start_systemd_scope(
-//        &name,
-//        pid,
-//        description.as_ref().map(::std::borrow::Borrow::borrow),
-//        connection.as_ref().map(::std::borrow::Borrow::borrow),
-//        Some(cancellable),
-//        move |res| {
-//            send.resolve(res);
-//        },
-//    );
-//}))
-//}
+    let user_data: Box_<glib::thread_guard::ThreadGuard<P>> =
+        Box_::new(glib::thread_guard::ThreadGuard::new(callback));
+    unsafe extern "C" fn start_systemd_scope_trampoline<
+        P: FnOnce(Result<(), glib::Error>) + 'static,
+    >(
+        _source_object: *mut glib::gobject_ffi::GObject,
+        res: *mut gio::ffi::GAsyncResult,
+        user_data: glib::ffi::gpointer,
+    ) {
+        let mut error = ptr::null_mut();
+        let _ = ffi::gnome_start_systemd_scope_finish(res, &mut error);
+        let result = if error.is_null() {
+            Ok(())
+        } else {
+            Err(from_glib_full(error))
+        };
+        let callback: Box_<glib::thread_guard::ThreadGuard<P>> =
+            Box_::from_raw(user_data as *mut _);
+        let callback: P = callback.into_inner();
+        callback(result);
+    }
+    let callback = start_systemd_scope_trampoline::<P>;
+    unsafe {
+        ffi::gnome_start_systemd_scope(
+            name.to_glib_none().0,
+            pid,
+            description.to_glib_none().0,
+            connection.to_glib_none().0,
+            cancellable.map(|p| p.as_ref()).to_glib_none().0,
+            Some(callback),
+            Box_::into_raw(user_data) as *mut _,
+        );
+    }
+}
+
+pub fn start_systemd_scope_future(
+    name: &str,
+    pid: i32,
+    description: Option<&str>,
+    connection: Option<&gio::DBusConnection>,
+) -> Pin<Box_<dyn std::future::Future<Output = Result<(), glib::Error>> + 'static>> {
+    skip_assert_initialized!();
+    let name = String::from(name);
+    let description = description.map(ToOwned::to_owned);
+    let connection = connection.map(ToOwned::to_owned);
+    Box_::pin(gio::GioFuture::new(&(), move |_obj, cancellable, send| {
+        start_systemd_scope(
+            &name,
+            pid,
+            description.as_ref().map(::std::borrow::Borrow::borrow),
+            connection.as_ref().map(::std::borrow::Borrow::borrow),
+            Some(cancellable),
+            move |res| {
+                send.resolve(res);
+            },
+        );
+    }))
+}

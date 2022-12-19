@@ -15,6 +15,7 @@ libc = "0.2"
 glib = "0.16"
 gio = "0.16"
 gdk-pixbuf = "0.16"
+gdesktop_enums = { package = "gsettings-desktop-schemas", version = "0.3" }
 ffi = { package = "gnome-desktop-sys", path = "./sys", version = "0.4" }
 
 [features]

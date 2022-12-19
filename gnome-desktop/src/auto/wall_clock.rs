@@ -111,12 +111,29 @@ pub trait WallClockExt: 'static {
     #[doc(alias = "get_clock")]
     fn clock(&self) -> Option<glib::GString>;
 
-    //#[doc(alias = "gnome_wall_clock_get_timezone")]
-    //#[doc(alias = "get_timezone")]
-    //fn timezone(&self) -> /*Ignored*/Option<glib::TimeZone>;
+    /// Returns the current local time zone used by this clock.
+    ///
+    /// # Returns
+    ///
+    /// the #GTimeZone of the clock.
+    #[doc(alias = "gnome_wall_clock_get_timezone")]
+    #[doc(alias = "get_timezone")]
+    fn timezone(&self) -> Option<glib::TimeZone>;
 
-    //#[doc(alias = "gnome_wall_clock_string_for_datetime")]
-    //fn string_for_datetime(&self, now: /*Ignored*/&glib::DateTime, clock_format: /*Ignored*/gdesktop_enums::ClockFormat, show_weekday: bool, show_full_date: bool, show_seconds: bool) -> Option<glib::GString>;
+    ///
+    /// # Returns
+    ///
+    /// a newly allocated string representing the date & time
+    /// passed, with the options applied.
+    #[doc(alias = "gnome_wall_clock_string_for_datetime")]
+    fn string_for_datetime(
+        &self,
+        now: &glib::DateTime,
+        clock_format: gdesktop_enums::ClockFormat,
+        show_weekday: bool,
+        show_full_date: bool,
+        show_seconds: bool,
+    ) -> Option<glib::GString>;
 
     /// If [`true`], the formatted clock will never include a date or the
     /// day of the week, irrespective of configuration.
@@ -147,13 +164,33 @@ impl<O: IsA<WallClock>> WallClockExt for O {
         }
     }
 
-    //fn timezone(&self) -> /*Ignored*/Option<glib::TimeZone> {
-    //    unsafe { TODO: call ffi:gnome_wall_clock_get_timezone() }
-    //}
+    fn timezone(&self) -> Option<glib::TimeZone> {
+        unsafe {
+            from_glib_none(ffi::gnome_wall_clock_get_timezone(
+                self.as_ref().to_glib_none().0,
+            ))
+        }
+    }
 
-    //fn string_for_datetime(&self, now: /*Ignored*/&glib::DateTime, clock_format: /*Ignored*/gdesktop_enums::ClockFormat, show_weekday: bool, show_full_date: bool, show_seconds: bool) -> Option<glib::GString> {
-    //    unsafe { TODO: call ffi:gnome_wall_clock_string_for_datetime() }
-    //}
+    fn string_for_datetime(
+        &self,
+        now: &glib::DateTime,
+        clock_format: gdesktop_enums::ClockFormat,
+        show_weekday: bool,
+        show_full_date: bool,
+        show_seconds: bool,
+    ) -> Option<glib::GString> {
+        unsafe {
+            from_glib_full(ffi::gnome_wall_clock_string_for_datetime(
+                self.as_ref().to_glib_none().0,
+                now.to_glib_none().0,
+                clock_format.into_glib(),
+                show_weekday.into_glib(),
+                show_full_date.into_glib(),
+                show_seconds.into_glib(),
+            ))
+        }
+    }
 
     fn is_time_only(&self) -> bool {
         glib::ObjectExt::property(self.as_ref(), "time-only")

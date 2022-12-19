@@ -13,12 +13,16 @@ generate_builder = true
 use_gi_docgen = true
 
 manual = [
-    "Gio.Initable",
+    "GDesktopEnums.ClockFormat",
     "GdkPixbuf.Pixbuf",
-    "Gio.Cancellable",
     "Gio.AsyncReadyCallback",
     "Gio.AsyncResult",
-    "GLib.Error"
+    "Gio.Cancellable",
+    "Gio.DBusConnection",
+    "Gio.Initable",
+    "GLib.DateTime",
+    "GLib.Error",
+    "GLib.TimeZone",
 ]
 
 generate = [
