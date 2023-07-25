@@ -10,7 +10,7 @@
     clippy::unreadable_literal,
     clippy::upper_case_acronyms
 )]
-#![cfg_attr(feature = "dox", feature(doc_cfg))]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 #[allow(unused_imports)]
 use libc::{
@@ -263,8 +263,8 @@ extern "C" {
         result: *mut gio::GAsyncResult,
         error: *mut *mut glib::GError,
     ) -> gboolean;
-    #[cfg(any(feature = "v42", feature = "dox"))]
-    #[cfg_attr(feature = "dox", doc(cfg(feature = "v42")))]
+    #[cfg(feature = "v42")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v42")))]
     pub fn gnome_desktop_thumbnail_factory_generate_thumbnail(
         factory: *mut GnomeDesktopThumbnailFactory,
         uri: *const c_char,
@@ -440,8 +440,8 @@ extern "C" {
         locale: *const c_char,
         translation: *const c_char,
     ) -> *mut c_char;
-    #[cfg(any(feature = "v43", feature = "dox"))]
-    #[cfg_attr(feature = "dox", doc(cfg(feature = "v43")))]
+    #[cfg(feature = "v43")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v43")))]
     pub fn gnome_get_platform_version() -> c_int;
     pub fn gnome_get_translated_modifier(
         modifier: *const c_char,

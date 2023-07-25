@@ -3,19 +3,12 @@
 // from gir-files (https://github.com/gtk-rs/gir-files.git)
 // DO NOT EDIT
 
-use glib::object::IsA;
-use glib::translate::*;
-use std::boxed::Box as Box_;
-use std::fmt;
+use glib::{prelude::*, translate::*};
+use std::{boxed::Box as Box_, fmt};
 
-#[cfg(any(feature = "gio_v2_22", feature = "dox"))]
-#[cfg_attr(feature = "dox", doc(cfg(feature = "gio_v2_22")))]
+#[cfg(feature = "gio_v2_22")]
+#[cfg_attr(docsrs, doc(cfg(feature = "gio_v2_22")))]
 glib::wrapper! {
-    ///
-    ///
-    /// # Implements
-    ///
-    /// [`IdleMonitorExt`][trait@crate::prelude::IdleMonitorExt], [`trait@gio::prelude::InitableExt`]
     #[doc(alias = "GnomeIdleMonitor")]
     pub struct IdleMonitor(Object<ffi::GnomeIdleMonitor, ffi::GnomeIdleMonitorClass>) @implements gio::Initable;
 
@@ -24,7 +17,7 @@ glib::wrapper! {
     }
 }
 
-#[cfg(not(any(feature = "gio_v2_22", feature = "dox")))]
+#[cfg(not(any(feature = "gio_v2_22")))]
 glib::wrapper! {
     #[doc(alias = "GnomeIdleMonitor")]
     pub struct IdleMonitor(Object<ffi::GnomeIdleMonitor, ffi::GnomeIdleMonitorClass>);
@@ -37,11 +30,6 @@ glib::wrapper! {
 impl IdleMonitor {
     pub const NONE: Option<&'static IdleMonitor> = None;
 
-    ///
-    /// # Returns
-    ///
-    /// a new #GnomeIdleMonitor that tracks the server-global
-    /// idletime for all devices.
     #[doc(alias = "gnome_idle_monitor_new")]
     pub fn new() -> IdleMonitor {
         assert_initialized_main_thread!();
@@ -55,81 +43,13 @@ impl Default for IdleMonitor {
     }
 }
 
-/// Trait containing all [`struct@IdleMonitor`] methods.
-///
-/// # Implementors
-///
-/// [`IdleMonitor`][struct@crate::IdleMonitor]
-pub trait IdleMonitorExt: 'static {
-    /// ## `interval_msec`
-    /// The idletime interval, in milliseconds. It must be
-    ///     a strictly positive value (> 0).
-    /// ## `callback`
-    /// The callback to call when the user has
-    ///     accumulated @interval_msec milliseconds of idle time.
-    /// ## `notify`
-    /// A #GDestroyNotify
-    ///
-    /// # Returns
-    ///
-    /// a watch id
-    ///
-    /// Adds a watch for a specific idle time. The callback will be called
-    /// when the user has accumulated @interval_msec milliseconds of idle time.
-    /// This function will return an ID that can either be passed to
-    /// gnome_idle_monitor_remove_watch(), or can be used to tell idle time
-    /// watches apart if you have more than one.
-    ///
-    /// Also note that this function will only care about positive transitions
-    /// (user's idle time exceeding a certain time). If you want to know about
-    /// when the user has become active, use
-    /// gnome_idle_monitor_add_user_active_watch().
-    #[doc(alias = "gnome_idle_monitor_add_idle_watch")]
-    fn add_idle_watch(
-        &self,
-        interval_msec: u64,
-        callback: Option<Box_<dyn Fn(&IdleMonitor, u32) + 'static>>,
-    ) -> u32;
-
-    /// ## `callback`
-    /// The callback to call when the user is
-    ///     active again.
-    /// ## `notify`
-    /// A #GDestroyNotify
-    ///
-    /// # Returns
-    ///
-    /// a watch id
-    ///
-    /// Add a one-time watch to know when the user is active again.
-    /// Note that this watch is one-time and will de-activate after the
-    /// function is called, for efficiency purposes. It's most convenient
-    /// to call this when an idle watch, as added by
-    /// gnome_idle_monitor_add_idle_watch(), has triggered.
-    #[doc(alias = "gnome_idle_monitor_add_user_active_watch")]
-    fn add_user_active_watch(
-        &self,
-        callback: Option<Box_<dyn Fn(&IdleMonitor, u32) + 'static>>,
-    ) -> u32;
-
-    ///
-    /// # Returns
-    ///
-    /// The current idle time, in milliseconds
-    #[doc(alias = "gnome_idle_monitor_get_idletime")]
-    #[doc(alias = "get_idletime")]
-    fn idletime(&self) -> u64;
-
-    /// Removes an idle time watcher, previously added by
-    /// gnome_idle_monitor_add_idle_watch() or
-    /// gnome_idle_monitor_add_user_active_watch().
-    /// ## `id`
-    /// A watch ID
-    #[doc(alias = "gnome_idle_monitor_remove_watch")]
-    fn remove_watch(&self, id: u32);
+mod sealed {
+    pub trait Sealed {}
+    impl<T: super::IsA<super::IdleMonitor>> Sealed for T {}
 }
 
-impl<O: IsA<IdleMonitor>> IdleMonitorExt for O {
+pub trait IdleMonitorExt: IsA<IdleMonitor> + sealed::Sealed + 'static {
+    #[doc(alias = "gnome_idle_monitor_add_idle_watch")]
     fn add_idle_watch(
         &self,
         interval_msec: u64,
@@ -149,13 +69,9 @@ impl<O: IsA<IdleMonitor>> IdleMonitorExt for O {
                 callback(&monitor, id)
             } else {
                 panic!("cannot get closure...")
-            };
+            }
         }
-        let callback = if callback_data.is_some() {
-            Some(callback_func as _)
-        } else {
-            None
-        };
+        let callback = if callback_data.is_some() { Some(callback_func as _) } else { None };
         unsafe extern "C" fn notify_func(data: glib::ffi::gpointer) {
             let _callback: Box_<Option<Box_<dyn Fn(&IdleMonitor, u32) + 'static>>> =
                 Box_::from_raw(data as *mut _);
@@ -174,6 +90,7 @@ impl<O: IsA<IdleMonitor>> IdleMonitorExt for O {
         }
     }
 
+    #[doc(alias = "gnome_idle_monitor_add_user_active_watch")]
     fn add_user_active_watch(
         &self,
         callback: Option<Box_<dyn Fn(&IdleMonitor, u32) + 'static>>,
@@ -192,13 +109,9 @@ impl<O: IsA<IdleMonitor>> IdleMonitorExt for O {
                 callback(&monitor, id)
             } else {
                 panic!("cannot get closure...")
-            };
+            }
         }
-        let callback = if callback_data.is_some() {
-            Some(callback_func as _)
-        } else {
-            None
-        };
+        let callback = if callback_data.is_some() { Some(callback_func as _) } else { None };
         unsafe extern "C" fn notify_func(data: glib::ffi::gpointer) {
             let _callback: Box_<Option<Box_<dyn Fn(&IdleMonitor, u32) + 'static>>> =
                 Box_::from_raw(data as *mut _);
@@ -216,16 +129,21 @@ impl<O: IsA<IdleMonitor>> IdleMonitorExt for O {
         }
     }
 
+    #[doc(alias = "gnome_idle_monitor_get_idletime")]
+    #[doc(alias = "get_idletime")]
     fn idletime(&self) -> u64 {
         unsafe { ffi::gnome_idle_monitor_get_idletime(self.as_ref().to_glib_none().0) }
     }
 
+    #[doc(alias = "gnome_idle_monitor_remove_watch")]
     fn remove_watch(&self, id: u32) {
         unsafe {
             ffi::gnome_idle_monitor_remove_watch(self.as_ref().to_glib_none().0, id);
         }
     }
 }
+
+impl<O: IsA<IdleMonitor>> IdleMonitorExt for O {}
 
 impl fmt::Display for IdleMonitor {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

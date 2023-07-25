@@ -3,22 +3,14 @@
 // from gir-files (https://github.com/gtk-rs/gir-files.git)
 // DO NOT EDIT
 
-use glib::object::Cast;
-use glib::object::IsA;
-use glib::signal::connect_raw;
-use glib::signal::SignalHandlerId;
-use glib::translate::*;
-use std::boxed::Box as Box_;
-use std::fmt;
-use std::mem::transmute;
-use std::ptr;
+use glib::{
+    prelude::*,
+    signal::{connect_raw, SignalHandlerId},
+    translate::*,
+};
+use std::{boxed::Box as Box_, fmt, mem::transmute, ptr};
 
 glib::wrapper! {
-    ///
-    ///
-    /// # Implements
-    ///
-    /// [`XkbInfoExt`][trait@crate::prelude::XkbInfoExt]
     #[doc(alias = "GnomeXkbInfo")]
     pub struct XkbInfo(Object<ffi::GnomeXkbInfo, ffi::GnomeXkbInfoClass>);
 
@@ -30,10 +22,6 @@ glib::wrapper! {
 impl XkbInfo {
     pub const NONE: Option<&'static XkbInfo> = None;
 
-    ///
-    /// # Returns
-    ///
-    /// a new #GnomeXkbInfo instance.
     #[doc(alias = "gnome_xkb_info_new")]
     pub fn new() -> XkbInfo {
         assert_initialized_main_thread!();
@@ -47,165 +35,13 @@ impl Default for XkbInfo {
     }
 }
 
-/// Trait containing all [`struct@XkbInfo`] methods.
-///
-/// # Implementors
-///
-/// [`XkbInfo`][struct@crate::XkbInfo]
-pub trait XkbInfoExt: 'static {
-    /// ## `group_id`
-    /// identifier for group
-    ///
-    /// # Returns
-    ///
-    /// the translated description for the group @group_id.
-    #[doc(alias = "gnome_xkb_info_description_for_group")]
-    fn description_for_group(&self, group_id: &str) -> Option<glib::GString>;
-
-    /// ## `group_id`
-    /// identifier for group containing the option
-    /// ## `id`
-    /// option identifier
-    ///
-    /// # Returns
-    ///
-    /// the translated description for the option @id.
-    #[doc(alias = "gnome_xkb_info_description_for_option")]
-    fn description_for_option(&self, group_id: &str, id: &str) -> Option<glib::GString>;
-
-    /// Returns a list of all layout identifiers we know about.
-    ///
-    /// # Returns
-    ///
-    /// the list
-    /// of layout names. The caller takes ownership of the #GList but not
-    /// of the strings themselves, those are internally allocated and must
-    /// not be modified.
-    #[doc(alias = "gnome_xkb_info_get_all_layouts")]
-    #[doc(alias = "get_all_layouts")]
-    fn all_layouts(&self) -> Vec<glib::GString>;
-
-    /// Returns a list of all option group identifiers we know about.
-    ///
-    /// # Returns
-    ///
-    /// the list
-    /// of option group ids. The caller takes ownership of the #GList but
-    /// not of the strings themselves, those are internally allocated and
-    /// must not be modified.
-    #[doc(alias = "gnome_xkb_info_get_all_option_groups")]
-    #[doc(alias = "get_all_option_groups")]
-    fn all_option_groups(&self) -> Vec<glib::GString>;
-
-    /// Returns a list of all languages supported by a layout, given by
-    /// @layout_id.
-    /// ## `layout_id`
-    /// a layout identifier
-    ///
-    /// # Returns
-    ///
-    /// the list of
-    /// ISO 639 code strings. The caller takes ownership of the #GList but
-    /// not of the strings themselves, those are internally allocated and
-    /// must not be modified.
-    #[doc(alias = "gnome_xkb_info_get_languages_for_layout")]
-    #[doc(alias = "get_languages_for_layout")]
-    fn languages_for_layout(&self, layout_id: &str) -> Vec<glib::GString>;
-
-    /// Retrieves information about a layout. Both @display_name and
-    /// @short_name are suitable to show in UIs and might be localized if
-    /// translations are available.
-    ///
-    /// Some layouts don't provide a short name (2 or 3 letters) or don't
-    /// specify a XKB variant, in those cases @short_name or @xkb_variant
-    /// are empty strings, i.e. "".
-    ///
-    /// If the given layout doesn't exist the return value is [`false`] and
-    /// all the (out) parameters are set to [`None`].
-    /// ## `id`
-    /// layout's identifier about which to retrieve the info
-    ///
-    /// # Returns
-    ///
-    /// [`true`] if the layout exists or [`false`] otherwise.
-    ///
-    /// ## `display_name`
-    /// location to store
-    /// the layout's display name, or [`None`]
-    ///
-    /// ## `short_name`
-    /// location to store
-    /// the layout's short name, or [`None`]
-    ///
-    /// ## `xkb_layout`
-    /// location to store
-    /// the layout's XKB name, or [`None`]
-    ///
-    /// ## `xkb_variant`
-    /// location to store
-    /// the layout's XKB variant, or [`None`]
-    #[doc(alias = "gnome_xkb_info_get_layout_info")]
-    #[doc(alias = "get_layout_info")]
-    fn layout_info(
-        &self,
-        id: &str,
-    ) -> Option<(
-        Option<glib::GString>,
-        Option<glib::GString>,
-        Option<glib::GString>,
-        Option<glib::GString>,
-    )>;
-
-    /// Returns a list of all layout identifiers we know about for
-    /// @country_code.
-    /// ## `country_code`
-    /// an ISO 3166 code string
-    ///
-    /// # Returns
-    ///
-    /// the list
-    /// of layout ids. The caller takes ownership of the #GList but not of
-    /// the strings themselves, those are internally allocated and must not
-    /// be modified.
-    #[doc(alias = "gnome_xkb_info_get_layouts_for_country")]
-    #[doc(alias = "get_layouts_for_country")]
-    fn layouts_for_country(&self, country_code: &str) -> Vec<glib::GString>;
-
-    /// Returns a list of all layout identifiers we know about for
-    /// @language_code.
-    /// ## `language_code`
-    /// an ISO 639 code string
-    ///
-    /// # Returns
-    ///
-    /// the list
-    /// of layout ids. The caller takes ownership of the #GList but not of
-    /// the strings themselves, those are internally allocated and must not
-    /// be modified.
-    #[doc(alias = "gnome_xkb_info_get_layouts_for_language")]
-    #[doc(alias = "get_layouts_for_language")]
-    fn layouts_for_language(&self, language_code: &str) -> Vec<glib::GString>;
-
-    /// Returns a list of all option identifiers we know about for group
-    /// @group_id.
-    /// ## `group_id`
-    /// group's identifier about which to retrieve the options
-    ///
-    /// # Returns
-    ///
-    /// the list
-    /// of option ids. The caller takes ownership of the #GList but not of
-    /// the strings themselves, those are internally allocated and must not
-    /// be modified.
-    #[doc(alias = "gnome_xkb_info_get_options_for_group")]
-    #[doc(alias = "get_options_for_group")]
-    fn options_for_group(&self, group_id: &str) -> Vec<glib::GString>;
-
-    #[doc(alias = "layouts-changed")]
-    fn connect_layouts_changed<F: Fn(&Self) + 'static>(&self, f: F) -> SignalHandlerId;
+mod sealed {
+    pub trait Sealed {}
+    impl<T: super::IsA<super::XkbInfo>> Sealed for T {}
 }
 
-impl<O: IsA<XkbInfo>> XkbInfoExt for O {
+pub trait XkbInfoExt: IsA<XkbInfo> + sealed::Sealed + 'static {
+    #[doc(alias = "gnome_xkb_info_description_for_group")]
     fn description_for_group(&self, group_id: &str) -> Option<glib::GString> {
         unsafe {
             from_glib_none(ffi::gnome_xkb_info_description_for_group(
@@ -215,6 +51,7 @@ impl<O: IsA<XkbInfo>> XkbInfoExt for O {
         }
     }
 
+    #[doc(alias = "gnome_xkb_info_description_for_option")]
     fn description_for_option(&self, group_id: &str, id: &str) -> Option<glib::GString> {
         unsafe {
             from_glib_none(ffi::gnome_xkb_info_description_for_option(
@@ -225,6 +62,8 @@ impl<O: IsA<XkbInfo>> XkbInfoExt for O {
         }
     }
 
+    #[doc(alias = "gnome_xkb_info_get_all_layouts")]
+    #[doc(alias = "get_all_layouts")]
     fn all_layouts(&self) -> Vec<glib::GString> {
         unsafe {
             FromGlibPtrContainer::from_glib_container(ffi::gnome_xkb_info_get_all_layouts(
@@ -233,6 +72,8 @@ impl<O: IsA<XkbInfo>> XkbInfoExt for O {
         }
     }
 
+    #[doc(alias = "gnome_xkb_info_get_all_option_groups")]
+    #[doc(alias = "get_all_option_groups")]
     fn all_option_groups(&self) -> Vec<glib::GString> {
         unsafe {
             FromGlibPtrContainer::from_glib_container(ffi::gnome_xkb_info_get_all_option_groups(
@@ -241,6 +82,8 @@ impl<O: IsA<XkbInfo>> XkbInfoExt for O {
         }
     }
 
+    #[doc(alias = "gnome_xkb_info_get_languages_for_layout")]
+    #[doc(alias = "get_languages_for_layout")]
     fn languages_for_layout(&self, layout_id: &str) -> Vec<glib::GString> {
         unsafe {
             FromGlibPtrContainer::from_glib_container(ffi::gnome_xkb_info_get_languages_for_layout(
@@ -250,6 +93,8 @@ impl<O: IsA<XkbInfo>> XkbInfoExt for O {
         }
     }
 
+    #[doc(alias = "gnome_xkb_info_get_layout_info")]
+    #[doc(alias = "get_layout_info")]
     fn layout_info(
         &self,
         id: &str,
@@ -285,6 +130,8 @@ impl<O: IsA<XkbInfo>> XkbInfoExt for O {
         }
     }
 
+    #[doc(alias = "gnome_xkb_info_get_layouts_for_country")]
+    #[doc(alias = "get_layouts_for_country")]
     fn layouts_for_country(&self, country_code: &str) -> Vec<glib::GString> {
         unsafe {
             FromGlibPtrContainer::from_glib_container(ffi::gnome_xkb_info_get_layouts_for_country(
@@ -294,6 +141,8 @@ impl<O: IsA<XkbInfo>> XkbInfoExt for O {
         }
     }
 
+    #[doc(alias = "gnome_xkb_info_get_layouts_for_language")]
+    #[doc(alias = "get_layouts_for_language")]
     fn layouts_for_language(&self, language_code: &str) -> Vec<glib::GString> {
         unsafe {
             FromGlibPtrContainer::from_glib_container(ffi::gnome_xkb_info_get_layouts_for_language(
@@ -303,6 +152,8 @@ impl<O: IsA<XkbInfo>> XkbInfoExt for O {
         }
     }
 
+    #[doc(alias = "gnome_xkb_info_get_options_for_group")]
+    #[doc(alias = "get_options_for_group")]
     fn options_for_group(&self, group_id: &str) -> Vec<glib::GString> {
         unsafe {
             FromGlibPtrContainer::from_glib_container(ffi::gnome_xkb_info_get_options_for_group(
@@ -312,6 +163,7 @@ impl<O: IsA<XkbInfo>> XkbInfoExt for O {
         }
     }
 
+    #[doc(alias = "layouts-changed")]
     fn connect_layouts_changed<F: Fn(&Self) + 'static>(&self, f: F) -> SignalHandlerId {
         unsafe extern "C" fn layouts_changed_trampoline<P: IsA<XkbInfo>, F: Fn(&P) + 'static>(
             this: *mut ffi::GnomeXkbInfo,
@@ -333,6 +185,8 @@ impl<O: IsA<XkbInfo>> XkbInfoExt for O {
         }
     }
 }
+
+impl<O: IsA<XkbInfo>> XkbInfoExt for O {}
 
 impl fmt::Display for XkbInfo {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

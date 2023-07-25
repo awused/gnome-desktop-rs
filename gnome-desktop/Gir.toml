@@ -30,7 +30,7 @@ generate = [
     "GnomeDesktop.DesktopThumbnailSize",
     "GnomeDesktop.IdleMonitor",
     "GnomeDesktop.PnpIds",
-    "GnomeDesktop.WallClock",
+    # "GnomeDesktop.WallClock",
     "GnomeDesktop.XkbInfo",
 ]
 

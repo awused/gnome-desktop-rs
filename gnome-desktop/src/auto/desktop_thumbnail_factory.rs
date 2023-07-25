@@ -4,19 +4,10 @@
 // DO NOT EDIT
 
 use crate::DesktopThumbnailSize;
-use glib::object::IsA;
-use glib::translate::*;
-use std::boxed::Box as Box_;
-use std::fmt;
-use std::pin::Pin;
-use std::ptr;
+use glib::{prelude::*, translate::*};
+use std::{boxed::Box as Box_, fmt, pin::Pin, ptr};
 
 glib::wrapper! {
-    ///
-    ///
-    /// # Implements
-    ///
-    /// [`DesktopThumbnailFactoryExt`][trait@crate::prelude::DesktopThumbnailFactoryExt]
     #[doc(alias = "GnomeDesktopThumbnailFactory")]
     pub struct DesktopThumbnailFactory(Object<ffi::GnomeDesktopThumbnailFactory, ffi::GnomeDesktopThumbnailFactoryClass>);
 
@@ -28,15 +19,6 @@ glib::wrapper! {
 impl DesktopThumbnailFactory {
     pub const NONE: Option<&'static DesktopThumbnailFactory> = None;
 
-    /// Creates a new #GnomeDesktopThumbnailFactory.
-    ///
-    /// This function must be called on the main thread and is non-blocking.
-    /// ## `size`
-    /// The thumbnail size to use
-    ///
-    /// # Returns
-    ///
-    /// a new #GnomeDesktopThumbnailFactory
     #[doc(alias = "gnome_desktop_thumbnail_factory_new")]
     pub fn new(size: DesktopThumbnailSize) -> DesktopThumbnailFactory {
         assert_initialized_main_thread!();
@@ -44,216 +26,15 @@ impl DesktopThumbnailFactory {
     }
 }
 
-/// Trait containing all [`struct@DesktopThumbnailFactory`] methods.
-///
-/// # Implementors
-///
-/// [`DesktopThumbnailFactory`][struct@crate::DesktopThumbnailFactory]
-pub trait DesktopThumbnailFactoryExt: 'static {
-    /// Returns TRUE if this GnomeDesktopThumbnailFactory can (at least try) to thumbnail
-    /// this file. Thumbnails or files with failed thumbnails won't be thumbnailed.
-    ///
-    /// Usage of this function is threadsafe and does blocking I/O.
-    /// ## `uri`
-    /// the uri of a file
-    /// ## `mime_type`
-    /// the mime type of the file
-    /// ## `mtime`
-    /// the mtime of the file
-    ///
-    /// # Returns
-    ///
-    /// TRUE if the file can be thumbnailed.
-    #[doc(alias = "gnome_desktop_thumbnail_factory_can_thumbnail")]
-    fn can_thumbnail(&self, uri: &str, mime_type: &str, mtime: libc::c_long) -> bool;
-
-    /// Creates a failed thumbnail for the file so that we don't try
-    /// to re-thumbnail the file later.
-    ///
-    /// Usage of this function is threadsafe and does blocking I/O.
-    /// ## `uri`
-    /// the uri of a file
-    /// ## `mtime`
-    /// the modification time of the file
-    /// ## `cancellable`
-    /// a GCancellable object, or NULL
-    ///
-    /// # Returns
-    ///
-    /// TRUE if everything went fine; FALSE if there was an error.
-    #[doc(alias = "gnome_desktop_thumbnail_factory_create_failed_thumbnail")]
-    fn create_failed_thumbnail(
-        &self,
-        uri: &str,
-        mtime: libc::c_long,
-        cancellable: Option<&impl IsA<gio::Cancellable>>,
-    ) -> Result<(), glib::Error>;
-
-    /// Asynchronous version of gnome_desktop_thumbnail_factory_create_failed_thumbnail()
-    ///
-    /// Since 43.0
-    /// ## `uri`
-    /// the uri of a file
-    /// ## `original_mtime`
-    /// the modification time of the original file
-    /// ## `cancellable`
-    /// a Cancellable object
-    /// ## `callback`
-    /// a function that will be called when the task has ended
-    #[doc(alias = "gnome_desktop_thumbnail_factory_create_failed_thumbnail_async")]
-    fn create_failed_thumbnail_async<P: FnOnce(Result<(), glib::Error>) + 'static>(
-        &self,
-        uri: &str,
-        original_mtime: libc::c_long,
-        cancellable: Option<&impl IsA<gio::Cancellable>>,
-        callback: P,
-    );
-
-    fn create_failed_thumbnail_future(
-        &self,
-        uri: &str,
-        original_mtime: libc::c_long,
-    ) -> Pin<Box_<dyn std::future::Future<Output = Result<(), glib::Error>> + 'static>>;
-
-    /// Tries to generate a thumbnail for the specified file. If it succeeds
-    /// it returns a pixbuf that can be used as a thumbnail.
-    ///
-    /// Usage of this function is threadsafe and does blocking I/O.
-    /// ## `uri`
-    /// the uri of a file
-    /// ## `mime_type`
-    /// the mime type of the file
-    /// ## `cancellable`
-    /// a #GCancellable object or NULL
-    ///
-    /// # Returns
-    ///
-    /// thumbnail pixbuf if thumbnailing succeeded, [`None`] otherwise and error will be set
-    #[cfg(any(feature = "v42", feature = "dox"))]
-    #[cfg_attr(feature = "dox", doc(cfg(feature = "v42")))]
-    #[doc(alias = "gnome_desktop_thumbnail_factory_generate_thumbnail")]
-    fn generate_thumbnail(
-        &self,
-        uri: &str,
-        mime_type: &str,
-        cancellable: Option<&impl IsA<gio::Cancellable>>,
-    ) -> Result<gdk_pixbuf::Pixbuf, glib::Error>;
-
-    /// Asynchronous version of gnome_desktop_thumbnail_factory_generate_thumbnail()
-    ///
-    /// Since 43.0
-    /// ## `uri`
-    /// the URI of a file
-    /// ## `mime_type`
-    /// the MIME type of the file
-    /// ## `cancellable`
-    /// a Cancellable object
-    /// ## `callback`
-    /// a function that will be called when the task has ended
-    #[doc(alias = "gnome_desktop_thumbnail_factory_generate_thumbnail_async")]
-    fn generate_thumbnail_async<P: FnOnce(Result<gdk_pixbuf::Pixbuf, glib::Error>) + 'static>(
-        &self,
-        uri: &str,
-        mime_type: &str,
-        cancellable: Option<&impl IsA<gio::Cancellable>>,
-        callback: P,
-    );
-
-    fn generate_thumbnail_future(
-        &self,
-        uri: &str,
-        mime_type: &str,
-    ) -> Pin<
-        Box_<dyn std::future::Future<Output = Result<gdk_pixbuf::Pixbuf, glib::Error>> + 'static>,
-    >;
-
-    /// Tries to locate an failed thumbnail for the file specified. Writing
-    /// and looking for failed thumbnails is important to avoid to try to
-    /// thumbnail e.g. broken images several times.
-    ///
-    /// Usage of this function is threadsafe and does blocking I/O.
-    /// ## `uri`
-    /// the uri of a file
-    /// ## `mtime`
-    /// the mtime of the file
-    ///
-    /// # Returns
-    ///
-    /// TRUE if there is a failed thumbnail for the file.
-    #[doc(alias = "gnome_desktop_thumbnail_factory_has_valid_failed_thumbnail")]
-    fn has_valid_failed_thumbnail(&self, uri: &str, mtime: libc::c_long) -> bool;
-
-    /// Tries to locate an existing thumbnail for the file specified.
-    ///
-    /// Usage of this function is threadsafe and does blocking I/O.
-    /// ## `uri`
-    /// the uri of a file
-    /// ## `mtime`
-    /// the mtime of the file
-    ///
-    /// # Returns
-    ///
-    /// The absolute path of the thumbnail, or [`None`] if none exist.
-    #[doc(alias = "gnome_desktop_thumbnail_factory_lookup")]
-    fn lookup(&self, uri: &str, mtime: libc::c_long) -> Option<glib::GString>;
-
-    /// Saves @thumbnail at the right place. If the save fails a
-    /// failed thumbnail is written.
-    ///
-    /// Usage of this function is threadsafe and does blocking I/O.
-    /// ## `thumbnail`
-    /// the thumbnail as a pixbuf
-    /// ## `uri`
-    /// the uri of a file
-    /// ## `original_mtime`
-    /// the modification time of the original file
-    /// ## `cancellable`
-    /// a GCancellable object, or NULL
-    ///
-    /// # Returns
-    ///
-    /// TRUE if everything went fine; FALSE if there was an error.
-    #[doc(alias = "gnome_desktop_thumbnail_factory_save_thumbnail")]
-    fn save_thumbnail(
-        &self,
-        thumbnail: &gdk_pixbuf::Pixbuf,
-        uri: &str,
-        original_mtime: libc::c_long,
-        cancellable: Option<&impl IsA<gio::Cancellable>>,
-    ) -> Result<(), glib::Error>;
-
-    /// Asynchronous version of gnome_desktop_thumbnail_factory_save_thumbnail()
-    ///
-    /// Since 43.0
-    /// ## `thumbnail`
-    /// the thumbnail as a pixbuf
-    /// ## `uri`
-    /// the uri of a file
-    /// ## `original_mtime`
-    /// the modification time of the original file
-    /// ## `cancellable`
-    /// a Cancellable object
-    /// ## `callback`
-    /// a function that will be called when the task has ended
-    #[doc(alias = "gnome_desktop_thumbnail_factory_save_thumbnail_async")]
-    fn save_thumbnail_async<P: FnOnce(Result<(), glib::Error>) + 'static>(
-        &self,
-        thumbnail: &gdk_pixbuf::Pixbuf,
-        uri: &str,
-        original_mtime: libc::c_long,
-        cancellable: Option<&impl IsA<gio::Cancellable>>,
-        callback: P,
-    );
-
-    fn save_thumbnail_future(
-        &self,
-        thumbnail: &gdk_pixbuf::Pixbuf,
-        uri: &str,
-        original_mtime: libc::c_long,
-    ) -> Pin<Box_<dyn std::future::Future<Output = Result<(), glib::Error>> + 'static>>;
+mod sealed {
+    pub trait Sealed {}
+    impl<T: super::IsA<super::DesktopThumbnailFactory>> Sealed for T {}
 }
 
-impl<O: IsA<DesktopThumbnailFactory>> DesktopThumbnailFactoryExt for O {
+pub trait DesktopThumbnailFactoryExt:
+    IsA<DesktopThumbnailFactory> + sealed::Sealed + 'static
+{
+    #[doc(alias = "gnome_desktop_thumbnail_factory_can_thumbnail")]
     fn can_thumbnail(&self, uri: &str, mime_type: &str, mtime: libc::c_long) -> bool {
         unsafe {
             from_glib(ffi::gnome_desktop_thumbnail_factory_can_thumbnail(
@@ -265,6 +46,7 @@ impl<O: IsA<DesktopThumbnailFactory>> DesktopThumbnailFactoryExt for O {
         }
     }
 
+    #[doc(alias = "gnome_desktop_thumbnail_factory_create_failed_thumbnail")]
     fn create_failed_thumbnail(
         &self,
         uri: &str,
@@ -280,7 +62,7 @@ impl<O: IsA<DesktopThumbnailFactory>> DesktopThumbnailFactoryExt for O {
                 cancellable.map(|p| p.as_ref()).to_glib_none().0,
                 &mut error,
             );
-            assert_eq!(is_ok == glib::ffi::GFALSE, !error.is_null());
+            debug_assert_eq!(is_ok == glib::ffi::GFALSE, !error.is_null());
             if error.is_null() {
                 Ok(())
             } else {
@@ -289,6 +71,7 @@ impl<O: IsA<DesktopThumbnailFactory>> DesktopThumbnailFactoryExt for O {
         }
     }
 
+    #[doc(alias = "gnome_desktop_thumbnail_factory_create_failed_thumbnail_async")]
     fn create_failed_thumbnail_async<P: FnOnce(Result<(), glib::Error>) + 'static>(
         &self,
         uri: &str,
@@ -298,9 +81,8 @@ impl<O: IsA<DesktopThumbnailFactory>> DesktopThumbnailFactoryExt for O {
     ) {
         let main_context = glib::MainContext::ref_thread_default();
         let is_main_context_owner = main_context.is_owner();
-        let has_acquired_main_context = (!is_main_context_owner)
-            .then(|| main_context.acquire().ok())
-            .flatten();
+        let has_acquired_main_context =
+            (!is_main_context_owner).then(|| main_context.acquire().ok()).flatten();
         assert!(
             is_main_context_owner || has_acquired_main_context.is_some(),
             "Async operations only allowed if the thread is owning the MainContext"
@@ -321,11 +103,7 @@ impl<O: IsA<DesktopThumbnailFactory>> DesktopThumbnailFactoryExt for O {
                 res,
                 &mut error,
             );
-            let result = if error.is_null() {
-                Ok(())
-            } else {
-                Err(from_glib_full(error))
-            };
+            let result = if error.is_null() { Ok(()) } else { Err(from_glib_full(error)) };
             let callback: Box_<glib::thread_guard::ThreadGuard<P>> =
                 Box_::from_raw(user_data as *mut _);
             let callback: P = callback.into_inner();
@@ -362,8 +140,9 @@ impl<O: IsA<DesktopThumbnailFactory>> DesktopThumbnailFactoryExt for O {
         }))
     }
 
-    #[cfg(any(feature = "v42", feature = "dox"))]
-    #[cfg_attr(feature = "dox", doc(cfg(feature = "v42")))]
+    #[cfg(feature = "v42")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "v42")))]
+    #[doc(alias = "gnome_desktop_thumbnail_factory_generate_thumbnail")]
     fn generate_thumbnail(
         &self,
         uri: &str,
@@ -387,6 +166,7 @@ impl<O: IsA<DesktopThumbnailFactory>> DesktopThumbnailFactoryExt for O {
         }
     }
 
+    #[doc(alias = "gnome_desktop_thumbnail_factory_generate_thumbnail_async")]
     fn generate_thumbnail_async<P: FnOnce(Result<gdk_pixbuf::Pixbuf, glib::Error>) + 'static>(
         &self,
         uri: &str,
@@ -396,9 +176,8 @@ impl<O: IsA<DesktopThumbnailFactory>> DesktopThumbnailFactoryExt for O {
     ) {
         let main_context = glib::MainContext::ref_thread_default();
         let is_main_context_owner = main_context.is_owner();
-        let has_acquired_main_context = (!is_main_context_owner)
-            .then(|| main_context.acquire().ok())
-            .flatten();
+        let has_acquired_main_context =
+            (!is_main_context_owner).then(|| main_context.acquire().ok()).flatten();
         assert!(
             is_main_context_owner || has_acquired_main_context.is_some(),
             "Async operations only allowed if the thread is owning the MainContext"
@@ -458,18 +237,18 @@ impl<O: IsA<DesktopThumbnailFactory>> DesktopThumbnailFactoryExt for O {
         }))
     }
 
+    #[doc(alias = "gnome_desktop_thumbnail_factory_has_valid_failed_thumbnail")]
     fn has_valid_failed_thumbnail(&self, uri: &str, mtime: libc::c_long) -> bool {
         unsafe {
-            from_glib(
-                ffi::gnome_desktop_thumbnail_factory_has_valid_failed_thumbnail(
-                    self.as_ref().to_glib_none().0,
-                    uri.to_glib_none().0,
-                    mtime,
-                ),
-            )
+            from_glib(ffi::gnome_desktop_thumbnail_factory_has_valid_failed_thumbnail(
+                self.as_ref().to_glib_none().0,
+                uri.to_glib_none().0,
+                mtime,
+            ))
         }
     }
 
+    #[doc(alias = "gnome_desktop_thumbnail_factory_lookup")]
     fn lookup(&self, uri: &str, mtime: libc::c_long) -> Option<glib::GString> {
         unsafe {
             from_glib_full(ffi::gnome_desktop_thumbnail_factory_lookup(
@@ -480,6 +259,7 @@ impl<O: IsA<DesktopThumbnailFactory>> DesktopThumbnailFactoryExt for O {
         }
     }
 
+    #[doc(alias = "gnome_desktop_thumbnail_factory_save_thumbnail")]
     fn save_thumbnail(
         &self,
         thumbnail: &gdk_pixbuf::Pixbuf,
@@ -497,7 +277,7 @@ impl<O: IsA<DesktopThumbnailFactory>> DesktopThumbnailFactoryExt for O {
                 cancellable.map(|p| p.as_ref()).to_glib_none().0,
                 &mut error,
             );
-            assert_eq!(is_ok == glib::ffi::GFALSE, !error.is_null());
+            debug_assert_eq!(is_ok == glib::ffi::GFALSE, !error.is_null());
             if error.is_null() {
                 Ok(())
             } else {
@@ -506,6 +286,7 @@ impl<O: IsA<DesktopThumbnailFactory>> DesktopThumbnailFactoryExt for O {
         }
     }
 
+    #[doc(alias = "gnome_desktop_thumbnail_factory_save_thumbnail_async")]
     fn save_thumbnail_async<P: FnOnce(Result<(), glib::Error>) + 'static>(
         &self,
         thumbnail: &gdk_pixbuf::Pixbuf,
@@ -516,9 +297,8 @@ impl<O: IsA<DesktopThumbnailFactory>> DesktopThumbnailFactoryExt for O {
     ) {
         let main_context = glib::MainContext::ref_thread_default();
         let is_main_context_owner = main_context.is_owner();
-        let has_acquired_main_context = (!is_main_context_owner)
-            .then(|| main_context.acquire().ok())
-            .flatten();
+        let has_acquired_main_context =
+            (!is_main_context_owner).then(|| main_context.acquire().ok()).flatten();
         assert!(
             is_main_context_owner || has_acquired_main_context.is_some(),
             "Async operations only allowed if the thread is owning the MainContext"
@@ -539,11 +319,7 @@ impl<O: IsA<DesktopThumbnailFactory>> DesktopThumbnailFactoryExt for O {
                 res,
                 &mut error,
             );
-            let result = if error.is_null() {
-                Ok(())
-            } else {
-                Err(from_glib_full(error))
-            };
+            let result = if error.is_null() { Ok(()) } else { Err(from_glib_full(error)) };
             let callback: Box_<glib::thread_guard::ThreadGuard<P>> =
                 Box_::from_raw(user_data as *mut _);
             let callback: P = callback.into_inner();
@@ -584,6 +360,8 @@ impl<O: IsA<DesktopThumbnailFactory>> DesktopThumbnailFactoryExt for O {
         }))
     }
 }
+
+impl<O: IsA<DesktopThumbnailFactory>> DesktopThumbnailFactoryExt for O {}
 
 impl fmt::Display for DesktopThumbnailFactory {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

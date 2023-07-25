@@ -4,24 +4,9 @@
 // DO NOT EDIT
 
 use crate::DesktopThumbnailSize;
-use glib::object::IsA;
-use glib::translate::*;
-use std::boxed::Box as Box_;
-use std::pin::Pin;
-use std::ptr;
+use glib::{prelude::*, translate::*};
+use std::{boxed::Box as Box_, pin::Pin, ptr};
 
-/// Returns whether the thumbnail has the correct uri and mtime embedded in the
-/// png options. This function is threadsafe and does no blocking I/O.
-/// ## `pixbuf`
-/// an loaded thumbnail #GdkPixbuf
-/// ## `uri`
-/// a uri
-/// ## `mtime`
-/// the mtime
-///
-/// # Returns
-///
-/// TRUE if the thumbnail has the right @uri and @mtime
 #[doc(alias = "gnome_desktop_thumbnail_is_valid")]
 pub fn desktop_thumbnail_is_valid(
     pixbuf: &gdk_pixbuf::Pixbuf,
@@ -38,16 +23,6 @@ pub fn desktop_thumbnail_is_valid(
     }
 }
 
-/// Returns the filename that a thumbnail of size @size for @uri would have.
-/// This function is threadsafe and does no blocking I/O.
-/// ## `uri`
-/// an uri
-/// ## `size`
-/// a thumbnail size
-///
-/// # Returns
-///
-/// an absolute filename
 #[doc(alias = "gnome_desktop_thumbnail_path_for_uri")]
 pub fn desktop_thumbnail_path_for_uri(
     uri: &str,
@@ -62,13 +37,6 @@ pub fn desktop_thumbnail_path_for_uri(
     }
 }
 
-/// Gets all locales.
-///
-/// # Returns
-///
-///
-///   a newly allocated [`None`]-terminated string array containing the
-///   all locales. Free with g_strfreev().
 #[doc(alias = "gnome_get_all_locales")]
 #[doc(alias = "get_all_locales")]
 pub fn all_locales() -> Vec<glib::GString> {
@@ -76,17 +44,6 @@ pub fn all_locales() -> Vec<glib::GString> {
     unsafe { FromGlibPtrContainer::from_glib_full(ffi::gnome_get_all_locales()) }
 }
 
-/// Gets the country name for @code. If @translation is provided the
-/// returned string is translated accordingly.
-/// ## `code`
-/// an ISO 3166 code string
-/// ## `translation`
-/// a locale string
-///
-/// # Returns
-///
-/// the country name. Caller takes
-/// ownership.
 #[doc(alias = "gnome_get_country_from_code")]
 #[doc(alias = "get_country_from_code")]
 pub fn country_from_code(code: &str, translation: Option<&str>) -> Option<glib::GString> {
@@ -99,17 +56,6 @@ pub fn country_from_code(code: &str, translation: Option<&str>) -> Option<glib::
     }
 }
 
-/// Gets the country description for @locale. If @translation is
-/// provided the returned string is translated accordingly.
-/// ## `locale`
-/// a locale string
-/// ## `translation`
-/// a locale string
-///
-/// # Returns
-///
-/// the country description. Caller
-/// takes ownership.
 #[doc(alias = "gnome_get_country_from_locale")]
 #[doc(alias = "get_country_from_locale")]
 pub fn country_from_locale(locale: &str, translation: Option<&str>) -> Option<glib::GString> {
@@ -122,22 +68,6 @@ pub fn country_from_locale(locale: &str, translation: Option<&str>) -> Option<gl
     }
 }
 
-/// Gets the default input source's type and identifier for a given
-/// locale.
-/// ## `locale`
-/// a locale string
-///
-/// # Returns
-///
-/// [`true`] if a input source exists or [`false`] otherwise.
-///
-/// ## `type_`
-/// location to store the input source
-/// type
-///
-/// ## `id`
-/// location to store the input source
-/// identifier
 #[doc(alias = "gnome_get_input_source_from_locale")]
 #[doc(alias = "get_input_source_from_locale")]
 pub fn input_source_from_locale(locale: &str) -> Option<(glib::GString, glib::GString)> {
@@ -158,17 +88,6 @@ pub fn input_source_from_locale(locale: &str) -> Option<(glib::GString, glib::GS
     }
 }
 
-/// Gets the language name for @code. If @translation is provided the
-/// returned string is translated accordingly.
-/// ## `code`
-/// an ISO 639 code string
-/// ## `translation`
-/// a locale string
-///
-/// # Returns
-///
-/// the language name. Caller takes
-/// ownership.
 #[doc(alias = "gnome_get_language_from_code")]
 #[doc(alias = "get_language_from_code")]
 pub fn language_from_code(code: &str, translation: Option<&str>) -> Option<glib::GString> {
@@ -181,17 +100,6 @@ pub fn language_from_code(code: &str, translation: Option<&str>) -> Option<glib:
     }
 }
 
-/// Gets the language description for @locale. If @translation is
-/// provided the returned string is translated accordingly.
-/// ## `locale`
-/// a locale string
-/// ## `translation`
-/// a locale string
-///
-/// # Returns
-///
-/// the language description. Caller
-/// takes ownership.
 #[doc(alias = "gnome_get_language_from_locale")]
 #[doc(alias = "get_language_from_locale")]
 pub fn language_from_locale(locale: &str, translation: Option<&str>) -> Option<glib::GString> {
@@ -204,17 +112,8 @@ pub fn language_from_locale(locale: &str, translation: Option<&str>) -> Option<g
     }
 }
 
-/// Returns an integer with the major version of GNOME. Useful for
-/// dynamic languages like Javascript or Python (static languages like
-/// C should use `GNOME_DESKTOP_PLATFORM_VERSION`). If this
-/// function doesn't exist, it can be presumed that the GNOME platform
-/// version is 42 or previous.
-///
-/// # Returns
-///
-/// an integer with the major version of GNOME.
-#[cfg(any(feature = "v43", feature = "dox"))]
-#[cfg_attr(feature = "dox", doc(cfg(feature = "v43")))]
+#[cfg(feature = "v43")]
+#[cfg_attr(docsrs, doc(cfg(feature = "v43")))]
 #[doc(alias = "gnome_get_platform_version")]
 #[doc(alias = "get_platform_version")]
 pub fn platform_version() -> i32 {
@@ -222,17 +121,6 @@ pub fn platform_version() -> i32 {
     unsafe { ffi::gnome_get_platform_version() }
 }
 
-/// Gets a translation of the raw @modifier string. If @translation
-/// is provided the returned string is translated accordingly.
-/// ## `modifier`
-/// the modifier part of a locale name
-/// ## `translation`
-/// a locale string
-///
-/// # Returns
-///
-/// the translated modifier string.
-/// Caller takes ownership.
 #[doc(alias = "gnome_get_translated_modifier")]
 #[doc(alias = "get_translated_modifier")]
 pub fn translated_modifier(modifier: &str, translation: Option<&str>) -> Option<glib::GString> {
@@ -245,59 +133,18 @@ pub fn translated_modifier(modifier: &str, translation: Option<&str>) -> Option<
     }
 }
 
-/// Returns [`true`] if there are translations for language @code.
-/// ## `code`
-/// an ISO 639 code string
-///
-/// # Returns
-///
-/// [`true`] if there are translations for language @code.
 #[doc(alias = "gnome_language_has_translations")]
 pub fn language_has_translations(code: &str) -> bool {
     assert_initialized_main_thread!();
     unsafe { from_glib(ffi::gnome_language_has_translations(code.to_glib_none().0)) }
 }
 
-/// Gets the normalized locale string in the form
-/// [language[_country][.codeset][@modifier]] for @name.
-/// ## `locale`
-/// a locale string
-///
-/// # Returns
-///
-/// normalized locale string. Caller
-/// takes ownership.
 #[doc(alias = "gnome_normalize_locale")]
 pub fn normalize_locale(locale: &str) -> Option<glib::GString> {
     assert_initialized_main_thread!();
     unsafe { from_glib_full(ffi::gnome_normalize_locale(locale.to_glib_none().0)) }
 }
 
-/// Extracts the various components of a locale string in XPG format.
-/// ([language[_country][.codeset][@modifier]]). See
-/// http://en.wikipedia.org/wiki/Locale.
-/// ## `locale`
-/// a locale string
-///
-/// # Returns
-///
-/// [`true`] if parsing was successful.
-///
-/// ## `language_codep`
-/// location to
-/// store the language code, or [`None`]
-///
-/// ## `country_codep`
-/// location to
-/// store the country code, or [`None`]
-///
-/// ## `codesetp`
-/// location to
-/// store the codeset, or [`None`]
-///
-/// ## `modifierp`
-/// location to
-/// store the modifier, or [`None`]
 #[doc(alias = "gnome_parse_locale")]
 pub fn parse_locale(
     locale: &str,
@@ -333,37 +180,6 @@ pub fn parse_locale(
     }
 }
 
-/// If the current process is running inside a user systemd instance, then move
-/// the launched PID into a transient scope. The given @name will be used to
-/// create a unit name. It should be the application ID or the executable in all
-/// other cases. If a desktop-id is passed then the .desktop suffix will be
-/// stripped.
-///
-/// It is advisable to use this function every time where the started application
-/// can be considered reasonably independent of the launching application. Placing
-/// it in a scope creates proper separation between the programs rather than being
-/// considered a single entity by systemd.
-///
-/// It is always safe to call this function. Note that a successful return code
-/// does not imply that a unit has been created. It solely means that no error
-/// condition was hit sending the request.
-///
-/// If @connection is [`None`] then g_dbus_get() will be called internally.
-///
-/// Note that most callers will not need to handle errors. As such, it is normal
-/// to pass a [`None`] @callback.
-/// ## `name`
-/// Name for the application
-/// ## `pid`
-/// The PID of the application
-/// ## `description`
-/// A description to use for the unit, or [`None`]
-/// ## `connection`
-/// An #GDBusConnection to the session bus, or [`None`]
-/// ## `cancellable`
-/// #GCancellable to use
-/// ## `callback`
-/// Callback to call when the operation is done
 #[doc(alias = "gnome_start_systemd_scope")]
 pub fn start_systemd_scope<P: FnOnce(Result<(), glib::Error>) + 'static>(
     name: &str,
@@ -377,9 +193,8 @@ pub fn start_systemd_scope<P: FnOnce(Result<(), glib::Error>) + 'static>(
 
     let main_context = glib::MainContext::ref_thread_default();
     let is_main_context_owner = main_context.is_owner();
-    let has_acquired_main_context = (!is_main_context_owner)
-        .then(|| main_context.acquire().ok())
-        .flatten();
+    let has_acquired_main_context =
+        (!is_main_context_owner).then(|| main_context.acquire().ok()).flatten();
     assert!(
         is_main_context_owner || has_acquired_main_context.is_some(),
         "Async operations only allowed if the thread is owning the MainContext"
@@ -396,11 +211,7 @@ pub fn start_systemd_scope<P: FnOnce(Result<(), glib::Error>) + 'static>(
     ) {
         let mut error = ptr::null_mut();
         let _ = ffi::gnome_start_systemd_scope_finish(res, &mut error);
-        let result = if error.is_null() {
-            Ok(())
-        } else {
-            Err(from_glib_full(error))
-        };
+        let result = if error.is_null() { Ok(()) } else { Err(from_glib_full(error)) };
         let callback: Box_<glib::thread_guard::ThreadGuard<P>> =
             Box_::from_raw(user_data as *mut _);
         let callback: P = callback.into_inner();

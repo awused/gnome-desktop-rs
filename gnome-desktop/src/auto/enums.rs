@@ -42,6 +42,7 @@ impl fmt::Display for DesktopThumbnailSize {
 impl IntoGlib for DesktopThumbnailSize {
     type GlibType = ffi::GnomeDesktopThumbnailSize;
 
+    #[inline]
     fn into_glib(self) -> ffi::GnomeDesktopThumbnailSize {
         match self {
             Self::Normal => ffi::GNOME_DESKTOP_THUMBNAIL_SIZE_NORMAL,
@@ -55,8 +56,10 @@ impl IntoGlib for DesktopThumbnailSize {
 
 #[doc(hidden)]
 impl FromGlib<ffi::GnomeDesktopThumbnailSize> for DesktopThumbnailSize {
+    #[inline]
     unsafe fn from_glib(value: ffi::GnomeDesktopThumbnailSize) -> Self {
         skip_assert_initialized!();
+
         match value {
             ffi::GNOME_DESKTOP_THUMBNAIL_SIZE_NORMAL => Self::Normal,
             ffi::GNOME_DESKTOP_THUMBNAIL_SIZE_LARGE => Self::Large,

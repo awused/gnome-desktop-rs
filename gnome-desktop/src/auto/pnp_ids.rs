@@ -3,16 +3,10 @@
 // from gir-files (https://github.com/gtk-rs/gir-files.git)
 // DO NOT EDIT
 
-use glib::object::IsA;
-use glib::translate::*;
+use glib::{prelude::*, translate::*};
 use std::fmt;
 
 glib::wrapper! {
-    ///
-    ///
-    /// # Implements
-    ///
-    /// [`PnpIdsExt`][trait@crate::prelude::PnpIdsExt]
     #[doc(alias = "GnomePnpIds")]
     pub struct PnpIds(Object<ffi::GnomePnpIds, ffi::GnomePnpIdsClass>);
 
@@ -24,12 +18,6 @@ glib::wrapper! {
 impl PnpIds {
     pub const NONE: Option<&'static PnpIds> = None;
 
-    /// Returns a reference to a #GnomePnpIds object, or creates
-    /// a new one if none have been created.
-    ///
-    /// # Returns
-    ///
-    /// a #GnomePnpIds object.
     #[doc(alias = "gnome_pnp_ids_new")]
     pub fn new() -> PnpIds {
         assert_initialized_main_thread!();
@@ -43,26 +31,14 @@ impl Default for PnpIds {
     }
 }
 
-/// Trait containing all [`struct@PnpIds`] methods.
-///
-/// # Implementors
-///
-/// [`PnpIds`][struct@crate::PnpIds]
-pub trait PnpIdsExt: 'static {
-    /// Find the full manufacturer name for the given PNP ID.
-    /// ## `pnp_id`
-    /// the PNP ID to look for
-    ///
-    /// # Returns
-    ///
-    /// a new string representing the manufacturer name,
-    /// or [`None`] when not found.
-    #[doc(alias = "gnome_pnp_ids_get_pnp_id")]
-    #[doc(alias = "get_pnp_id")]
-    fn pnp_id(&self, pnp_id: &str) -> Option<glib::GString>;
+mod sealed {
+    pub trait Sealed {}
+    impl<T: super::IsA<super::PnpIds>> Sealed for T {}
 }
 
-impl<O: IsA<PnpIds>> PnpIdsExt for O {
+pub trait PnpIdsExt: IsA<PnpIds> + sealed::Sealed + 'static {
+    #[doc(alias = "gnome_pnp_ids_get_pnp_id")]
+    #[doc(alias = "get_pnp_id")]
     fn pnp_id(&self, pnp_id: &str) -> Option<glib::GString> {
         unsafe {
             from_glib_full(ffi::gnome_pnp_ids_get_pnp_id(
@@ -72,6 +48,8 @@ impl<O: IsA<PnpIds>> PnpIdsExt for O {
         }
     }
 }
+
+impl<O: IsA<PnpIds>> PnpIdsExt for O {}
 
 impl fmt::Display for PnpIds {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
