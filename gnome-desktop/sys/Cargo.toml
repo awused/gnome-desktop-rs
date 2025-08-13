@@ -29,26 +29,26 @@ libc = "0.2"
 
 [dependencies.glib]
 package = "glib-sys"
-version = "0.20"
+version = "0.21"
 
 [dependencies.gio]
 package = "gio-sys"
-version = "0.20"
+version = "0.21"
 
 [dependencies.gobject]
 package = "gobject-sys"
-version = "0.20"
+version = "0.21"
 
 [dependencies.gdk-pixbuf]
 package = "gdk-pixbuf-sys"
-version = "0.20"
+version = "0.21"
 
 [dependencies.gdesktop_enums]
 package = "gsettings-desktop-schemas-sys"
-version = "0.3.0"
+version = "0.3.1"
 
 [build-dependencies]
-system-deps = "6"
+system-deps = "7"
 
 [dev-dependencies]
 shell-words = "1.1.0"
